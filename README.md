@@ -18,3 +18,7 @@ This is the SIMPLEST expense tracker that you or any Indian could ever ask for!
 • `npm run dev`
 
 And your savings go boom! 💥
+
+## PLEASE NOTE:
+• Authentication for this branch has been done on purely frontend using Google's OAuth PKCE(Proof Key for Code Exchange) flow, which involves client secret passing and not recommended for sensitive endpoints. This is suitable for SPAs.
+
