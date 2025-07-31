@@ -5,19 +5,19 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Trash2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { Income, Expense } from '@/pages/Index';
+import { Income, Expense, Investment} from '@/pages/Index';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
 
-type Transaction = Income | Expense;
+type Transaction = Income | Expense | Investment;
 
 interface TransactionDetailModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   transactions: Transaction[];
-  type: 'income' | 'expense' | null;
-  onDelete: (id: string, type: 'income' | 'expense') => void;
+  type: 'income' | 'expense' | 'investment' | null;
+  onDelete: (id: string, type: 'income' | 'expense'| 'investment') => void;
 }
 
 const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ open, onOpenChange, title, transactions, type, onDelete }) => {
@@ -44,6 +44,7 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ open, o
   };
 
   const confirmDelete = () => {
+
     if (deleteCandidate && type) {
       onDelete(deleteCandidate, type);
     }
@@ -69,13 +70,13 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ open, o
                           <div key={tx.id} className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50">
                             <div>
                               <p className="font-medium text-foreground">
-                                {'source' in tx ? tx.source : tx.category}
+                                {'source' in tx ? tx.source : 'category' in tx ? tx.category : tx.type}
                               </p>
                               {tx.description && <p className="text-xs text-muted-foreground">{tx.description}</p>}
                             </div>
                             <div className="flex items-center gap-2">
-                              <span className={cn("font-bold", type === 'income' ? 'text-success' : 'text-destructive')}>
-                                {type === 'income' ? '+' : '-'}₹{tx.amount.toLocaleString('en-IN')}
+                              <span className={cn("font-bold", type === 'income' ? 'text-success' : type === 'investment' ? 'text-blue-600' : 'text-destructive')}>
+                                {['income', 'investment'].includes(type) ? '+' : '-'}₹{tx.amount.toLocaleString('en-IN')}
                               </span>
                               <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteClick(tx.id)}>
                                 <Trash2 className="h-4 w-4" />

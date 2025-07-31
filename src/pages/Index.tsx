@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar as CalendarIcon, Plus, ChevronLeft, ChevronRight, Loader2, Download } from 'lucide-react';
+import { Calendar as CalendarIcon, Plus, ChevronLeft, ChevronRight, Loader2, Download, LetterTextIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -60,7 +60,7 @@ const Index = () => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
   
-  const [transactionModalState, setTransactionModalState] = useState<{ open: boolean; type: 'income' | 'expense' | null; title: string }>({ open: false, type: null, title: '' });
+  const [transactionModalState, setTransactionModalState] = useState<{ open: boolean; type: 'income' | 'expense' | 'investment' | null; title: string }>({ open: false, type: null, title: '' });
   const [investmentModalState, setInvestmentModalState] = useState<{ open: boolean; type: string | null; title: string }>({ open: false, type: null, title: '' });
 
   const [pickerMode, setPickerMode] = useState<'day' | 'month' | 'year'>('day');
@@ -84,11 +84,14 @@ const Index = () => {
     else if (type === 'investment') setInvestments(prev => [newTransaction, ...prev]);
   };
   
-  const handleDeleteTransaction = (id: string, type: 'income' | 'expense') => {
+  const handleDeleteTransaction = (id: string, type: 'income' | 'expense' | 'investment') => {
     if (type === 'income') {
       setIncome(prev => prev.filter(i => i.id !== id));
-    } else {
+    } else if (type === 'expense') {
       setExpenses(prev => prev.filter(e => e.id !== id));
+    }
+    else {
+      setInvestments(prev => prev.filter(inv => inv.id !== id));
     }
   };
 
@@ -96,11 +99,11 @@ const Index = () => {
     setInvestments(prev => prev.filter(inv => inv.id !== id));
   };
 
-  const handleViewTransactionDetails = (type: 'income' | 'expense') => {
+  const handleViewTransactionDetails = (type: 'income' | 'expense' | 'investment') => {
     setTransactionModalState({
       open: true,
       type,
-      title: type === 'income' ? 'Income Details' : 'Expense Details'
+      title: type === 'income' ? 'Income Details' : type === 'expense' ? 'Expense Details' : 'Investment Details'
     });
   };
 
@@ -112,34 +115,41 @@ const Index = () => {
     });
   };
 
-  const { avgSalary, avgExpenses, avgSavings } = useMemo(() => {
+  const { avgSalary, avgExpenses, totalInvestmentsTillDate, avgSavings} = useMemo(() => {
     const allMonths = new Set([...income.map(i => i.month), ...expenses.map(e => e.month)]);
     if (allMonths.size === 0) {
-      return { avgSalary: 0, avgExpenses: 0, avgSavings: 0 };
+      return { avgSalary: 0, avgExpenses: 0, totalInvestmentsTillDate: 0, avgSavings: 0 };
     }
 
     let totalSalary = 0;
     let totalExpensesNum = 0;
+    let totalInvestmentsNum = 0;
 
     for (const month of allMonths) {
       const monthlyIncome = income.filter(i => i.month === month).reduce((sum, i) => sum + i.amount, 0);
       const monthlyExpenses = expenses.filter(e => e.month === month).reduce((sum, e) => sum + e.amount, 0);
+      const monthlyInvestments = investments.filter(e => e.month === month).reduce((sum, e) => sum + e.amount, 0);
+      
       totalSalary += monthlyIncome;
       totalExpensesNum += monthlyExpenses;
+      totalInvestmentsNum += monthlyInvestments;
     }
 
     const numMonths = allMonths.size;
     const avgSalary = totalSalary / numMonths;
     const avgExpenses = totalExpensesNum / numMonths;
-    const avgSavings = avgSalary - avgExpenses;
+    const avgInvestments = totalInvestmentsNum / numMonths;
+    const totalInvestmentsTillDate = totalInvestmentsNum;
+    const avgSavings = avgSalary - avgExpenses - avgInvestments;
 
-    return { avgSalary, avgExpenses, avgSavings };
-  }, [income, expenses]);
+    return { avgSalary, avgExpenses,totalInvestmentsTillDate, avgSavings};
+  }, [income, expenses, investments]);
 
   // Filtered data for selected month
   const selectedMonth = useMemo(() => format(selectedDate, 'yyyy-MM'), [selectedDate]);
   const currentMonthIncome = useMemo(() => income.filter(i => i.month === selectedMonth), [income, selectedMonth]);
   const currentMonthExpenses = useMemo(() => expenses.filter(e => e.month === selectedMonth), [expenses, selectedMonth]);
+  const currentMonthInvestments = useMemo(() => investments.filter(e => e.month === selectedMonth), [investments, selectedMonth]);
 
   const selectedInvestmentTransactions = useMemo(() => {
     if (!investmentModalState.type) return [];
@@ -149,7 +159,8 @@ const Index = () => {
   // Calculations
   const totalIncome = useMemo(() => currentMonthIncome.reduce((sum, i) => sum + i.amount, 0), [currentMonthIncome]);
   const totalExpenses = useMemo(() => currentMonthExpenses.reduce((sum, e) => sum + e.amount, 0), [currentMonthExpenses]);
-  const totalSavings = totalIncome - totalExpenses;
+  const totalInvestments = useMemo(() => currentMonthInvestments.reduce((sum, e) => sum + e.amount, 0), [currentMonthInvestments]);
+  const totalSavings = totalIncome - totalExpenses - totalInvestments;
 
   const totalNeeds = useMemo(() => currentMonthExpenses.filter(e => e.type === 'needs').reduce((sum, e) => sum + e.amount, 0), [currentMonthExpenses]);
   const totalWants = useMemo(() => currentMonthExpenses.filter(e => e.type === 'wants').reduce((sum, e) => sum + e.amount, 0), [currentMonthExpenses]);
@@ -392,7 +403,6 @@ const Index = () => {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-8">
       <div className="max-w-6xl mx-auto">
@@ -457,6 +467,7 @@ const Index = () => {
               <UserProfileCard 
                 avgSalary={avgSalary}
                 avgExpenses={avgExpenses}
+                totalInvestments={totalInvestmentsTillDate}
                 avgSavings={avgSavings}
               />
             </div>
@@ -464,16 +475,18 @@ const Index = () => {
               <FinancialOverviewCard 
                 income={totalIncome}
                 expenses={totalExpenses}
+                investments={totalInvestments}
                 savings={totalSavings}
                 onViewIncomeDetails={() => handleViewTransactionDetails('income')}
                 onViewExpenseDetails={() => handleViewTransactionDetails('expense')}
+                onViewInvestmentDetails={() => handleViewTransactionDetails('investment')}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8">
             <div className={`${currentMonthExpenses.length > 0 ? "lg:col-span-3" : "lg:col-span-5"} savings-chart`}>
-              <SavingsChart income={income} expenses={expenses} />
+              <SavingsChart income={income} expenses={expenses} investments={investments}/>
             </div>
             {currentMonthExpenses.length > 0 && (
               <div className="lg:col-span-2">
@@ -503,7 +516,7 @@ const Index = () => {
         open={transactionModalState.open}
         onOpenChange={(isOpen) => setTransactionModalState(prev => ({ ...prev, open: isOpen }))}
         title={transactionModalState.title}
-        transactions={transactionModalState.type === 'income' ? currentMonthIncome : currentMonthExpenses}
+        transactions={transactionModalState.type === 'income' ? currentMonthIncome : transactionModalState.type === 'expense' ? currentMonthExpenses : currentMonthInvestments}
         type={transactionModalState.type}
         onDelete={handleDeleteTransaction}
       />

@@ -3,16 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from 'recharts';
 import { format } from 'date-fns';
-import { Income, Expense } from '@/pages/Index';
+import { Income, Expense, Investment } from '@/pages/Index';
 import { BarChart3 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 interface SavingsChartProps {
   income: Income[];
   expenses: Expense[];
+  investments: Investment[];
 }
 
-const SavingsChart: React.FC<SavingsChartProps> = ({ income, expenses }) => {
+const SavingsChart: React.FC<SavingsChartProps> = ({ income, expenses, investments }) => {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
 
   const chartConfig = { savings: { label: "Savings", color: "hsl(var(--primary))" } };
@@ -28,10 +29,11 @@ const SavingsChart: React.FC<SavingsChartProps> = ({ income, expenses }) => {
   }, [income, expenses]);
 
   const savingsData = useMemo(() => {
-    const monthlyData: { [key: string]: { income: number; expenses: number } } = {};
+    const monthlyData: { [key: string]: { income: number; expenses: number, investments: number } } = {};
 
     const yearIncome = income.filter(i => i.month.startsWith(selectedYear.toString()));
-    const yearExpenses = expenses.filter(e => e.month.startsWith(selectedYear.toString()));
+    const yearExpenses = expenses.filter(e => e.month.startsWith(selectedYear.toString()))
+    const yearInvestments = investments.filter(e => e.month.startsWith(selectedYear.toString()));
 
     yearIncome.forEach(i => {
       const month = i.month;
@@ -41,12 +43,16 @@ const SavingsChart: React.FC<SavingsChartProps> = ({ income, expenses }) => {
       const month = e.month;
       monthlyData[month] = { ...monthlyData[month], expenses: (monthlyData[month]?.expenses || 0) + e.amount };
     });
+    yearInvestments.forEach(e => {
+      const month = e.month;
+      monthlyData[month] = { ...monthlyData[month], investments: (monthlyData[month]?.investments || 0) + e.amount };
+    });
 
     return Array.from({ length: 12 }).map((_, i) => {
       const monthStr = (i + 1).toString().padStart(2, '0');
       const monthKey = `${selectedYear}-${monthStr}`;
-      const data = monthlyData[monthKey] || { income: 0, expenses: 0 };
-      const savings = data.income - data.expenses;
+      const data = monthlyData[monthKey] || { income: 0, expenses: 0, investments: 0 };
+      const savings = data.income - data.expenses - data.investments;
       const date = new Date(selectedYear, i, 1);
 
       return {
@@ -55,7 +61,7 @@ const SavingsChart: React.FC<SavingsChartProps> = ({ income, expenses }) => {
         savings,
       };
     });
-  }, [income, expenses, selectedYear]);
+  }, [income, expenses, investments, selectedYear]);
   
   const hasData = useMemo(() => savingsData.some(d => d.savings !== 0), [savingsData]);
 

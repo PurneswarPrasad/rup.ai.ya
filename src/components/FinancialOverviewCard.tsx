@@ -1,23 +1,31 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import InfoIconWithTooltip from '@/components/ui/InfoIconWithTooltip';
 import { Button } from '@/components/ui/button';
-import { Landmark, PiggyBank, ShoppingCart, Wallet, ChevronRight } from 'lucide-react';
+import { Landmark, PiggyBank, ShoppingCart, Wallet, ChevronRight, ChartNoAxesCombined } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface FinancialOverviewCardProps {
   income: number;
   expenses: number;
+  investments: number;
   savings: number;
   onViewIncomeDetails: () => void;
   onViewExpenseDetails: () => void;
+  onViewInvestmentDetails: () => void;
 }
 
-const FinancialOverviewCard: React.FC<FinancialOverviewCardProps> = ({ income, expenses, savings, onViewIncomeDetails, onViewExpenseDetails }) => {
+const FinancialOverviewCard: React.FC<FinancialOverviewCardProps> = ({ income, expenses, investments, savings, onViewIncomeDetails, onViewExpenseDetails, onViewInvestmentDetails }) => {
   return (
     <Card className="glass-card h-full">
       <CardHeader className="flex-row items-center gap-4 space-y-0 pb-4">
         <Landmark className="w-5 h-5 text-muted-foreground" />
         <CardTitle className="text-base font-semibold text-foreground/90">Financial Overview</CardTitle>
+        <InfoIconWithTooltip text={
+          <>
+            Your complete financial summary for the <strong>current month</strong> including total income, expenses, investments, and current net savings.
+          </>
+        } />
       </CardHeader>
       <CardContent className="space-y-2">
         <OverviewItem 
@@ -37,7 +45,15 @@ const FinancialOverviewCard: React.FC<FinancialOverviewCardProps> = ({ income, e
           onViewDetails={onViewExpenseDetails}
         />
         <OverviewItem 
-          title="Savings" 
+          title="Investments" 
+          amount={investments} 
+          icon={<ChartNoAxesCombined className="h-4 w-4" />} 
+          colorClass="text-yellow-500"
+          iconBgClass="bg-yellow-900/20 hover:bg-yellow-900/30"
+          onViewDetails={onViewInvestmentDetails}
+        />
+        <OverviewItem 
+          title="Balance at the end of the month/Savings" 
           amount={savings} 
           icon={<PiggyBank className="h-4 w-4" />} 
           colorClass={savings >= 0 ? 'text-primary' : 'text-destructive'}
