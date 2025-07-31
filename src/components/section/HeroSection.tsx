@@ -12,10 +12,11 @@ const HeroSection = () => {
     
     // For production, use actual Google OAuth
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID'
-    const redirectUri = import.meta.env.DEV
-    ? 'http://localhost:8080/auth/callback'
-    : import.meta.env.VITE_GOOGLE_REDIRECT_URI;
-    // const redirectUri = import.meta.env.VITE_REDIRECT_URI || `${window.location.origin}/auth/callback`
+    // const redirectUri = import.meta.env.DEV
+    // ? 'http://localhost:8080/auth/callback'
+    // : import.meta.env.VITE_GOOGLE_REDIRECT_URI;
+    const redirectUri = import.meta.env.VITE_GOOGLE_REDIRECT_URI;
+    // const redirectUri = import.meta.env.VITE_GOOGLE_REDIRECT_URI || `${window.location.origin}/auth/callback`
     
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&scope=openid%20profile%20email&response_type=code&access_type=offline`
     
