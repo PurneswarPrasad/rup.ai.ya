@@ -10,38 +10,75 @@ const GoogleAuthCallback = () => {
 
   useEffect(() => {
     const handleGoogleCallback = async () => {
+      // Get the authorization code from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get("code");
+      const returnedState = urlParams.get("state");
+      const storedState = sessionStorage.getItem("oauth_state");
+      const error = urlParams.get("error");
+
+      console.log(storedState);
+      
+      if (error || returnedState !== storedState) {
+        console.log(2);
+        setError("Authentication was cancelled or failed");
+        setTimeout(() => navigate("/"), 3000);
+        return;
+      }
+
+      if (!code) {
+        console.log(3);
+        setError("No authorization code received");
+        setTimeout(() => navigate("/"), 3000);
+        return;
+      }
+
+      const code_verifier = sessionStorage.getItem("code_verifier");
+      
+      console.log("code_verifier:", code_verifier);
+
+      const body = new URLSearchParams({
+        code,
+        client_id:
+          import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID",
+        client_secret: import.meta.env.VITE_GOOGLE_CLIENT_SECRET || "YOUR_GOOGLE_CLIENT_SECRET", //this is dangerous, but for testing purposes. You can use a secret manager in production
+        redirect_uri:
+          import.meta.env.VITE_REDIRECT_URI ||
+          `${window.location.origin}/auth/callback`,
+        grant_type: "authorization_code",
+        code_verifier: code_verifier || "",
+      });
+
       try {
-        // Get the authorization code from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get("code");
-        const error = urlParams.get("error");
+        const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body,
+        });
 
-        if (error) {
-          setError("Authentication was cancelled or failed");
-          setTimeout(() => navigate("/"), 3000);
-          return;
-        }
+        const tokenData = await tokenRes.json();
 
-        if (!code) {
-          setError("No authorization code received");
-          setTimeout(() => navigate("/"), 3000);
-          return;
-        }
+        console.log("tokenData:", tokenData);
 
-        // Here you would typically exchange the code for tokens
-        // For now, we'll simulate a successful login
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        if (tokenData.error) throw new Error(tokenData.error_description);
 
-        // Store user session (replace with actual user data from your backend)
-        const userData = {
-          id: "1",
-          name: "John Doe",
-          email: "john@example.com",
-          picture:
-            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-        };
+        // Optional: fetch user info using access token
+        const userRes = await fetch(
+          "https://www.googleapis.com/oauth2/v3/userinfo",
+          {
+            headers: {
+              Authorization: `Bearer ${tokenData.access_token}`,
+            },
+          }
+        );
 
-        localStorage.setItem("user", JSON.stringify(userData));
+        const user = await userRes.json();
+
+        // Store token & user securely
+        sessionStorage.setItem("google_token", tokenData.access_token);
+        sessionStorage.setItem("user", JSON.stringify(user));
 
         // Redirect to Index
         navigate("/index");

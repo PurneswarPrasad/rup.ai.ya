@@ -3,6 +3,7 @@ import { Calendar as CalendarIcon, Plus, ChevronLeft, ChevronRight, Loader2, Dow
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import UserProfileCard from '@/components/UserProfileCard';
 import FinancialOverviewCard from '@/components/FinancialOverviewCard';
 import TransactionSheet from '@/components/TransactionSheet';
@@ -68,6 +69,8 @@ const Index = () => {
   const [yearGridStart, setYearGridStart] = useState(new Date().getFullYear() - 5);
   
   const [isImporting, setIsImporting] = useState(false);
+
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   // Load and save data
   useEffect(() => { localStorage.setItem('expenses_v2', JSON.stringify(expenses)); }, [expenses]);
@@ -403,6 +406,11 @@ const Index = () => {
     }
   };
 
+  const handleLogOut = () => {
+    sessionStorage.clear();
+    window.location.href = "/"; // or use navigate("/") if you're using react-router
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-8">
       <div className="max-w-6xl mx-auto">
@@ -456,6 +464,13 @@ const Index = () => {
             >
               <Plus className="h-4 w-4 md:mr-2" />
               <span className="hidden md:inline">Add</span>
+            </Button>
+            <Button 
+              onClick={() => setShowLogoutDialog(true)}
+              variant="outline"
+              className="bg-transparent border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white transition-all duration-300"
+            >
+              Log out
             </Button>
             <ThemeToggle />
           </div>
@@ -534,6 +549,28 @@ const Index = () => {
         expenses={expenses}
         investments={investments}
       />
+
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to log out? You will need to log in again to access your data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowLogoutDialog(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={handleLogOut}
+            >
+              Log Out
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
