@@ -120,6 +120,45 @@ const Index = () => {
 
   const [isImporting, setIsImporting] = useState(false);
 
+  // Add at the top, after other useState hooks
+  const [wvTimeframe, setWvTimeframe] = useState<
+    "monthly" | "quarterly" | "yearly"
+  >("monthly");
+  const [wvSelectedPeriod, setWvSelectedPeriod] = useState<string>("");
+  const [savingsYear, setSavingsYear] = useState<number>(
+    new Date().getFullYear()
+  );
+  const [savingsMode, setSavingsMode] = useState<"savings" | "expenses">(
+    "savings"
+  );
+
+  // Helper to get period string for WantsVsNeedsChart based on date and timeframe
+  const getPeriodFromDate = (
+    date: Date,
+    timeframe: "monthly" | "quarterly" | "yearly"
+  ) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    switch (timeframe) {
+      case "monthly":
+        return `${year}-${String(month + 1).padStart(2, "0")}`;
+      case "quarterly": {
+        const quarter = Math.floor(month / 3) + 1;
+        return `${year}-Q${quarter}`;
+      }
+      case "yearly":
+        return year.toString();
+      default:
+        return "";
+    }
+  };
+
+  // When selectedDate changes, update chart controls
+  useEffect(() => {
+    setSavingsYear(selectedDate.getFullYear());
+    setWvSelectedPeriod(getPeriodFromDate(selectedDate, wvTimeframe));
+  }, [selectedDate, wvTimeframe]);
+
   // Load and save data
   useEffect(() => {
     localStorage.setItem("expenses_v2", JSON.stringify(expenses));
@@ -647,11 +686,21 @@ const Index = () => {
                 income={income}
                 expenses={expenses}
                 investments={investments}
+                selectedYear={savingsYear}
+                setSelectedYear={setSavingsYear}
+                mode={savingsMode}
+                setMode={setSavingsMode}
               />
             </div>
             {currentMonthExpenses.length > 0 && (
               <div className="lg:col-span-2">
-                <WantsVsNeedsChart expenses={expenses} />
+                <WantsVsNeedsChart
+                  expenses={expenses}
+                  timeframe={wvTimeframe}
+                  setTimeframe={setWvTimeframe}
+                  selectedPeriod={wvSelectedPeriod}
+                  setSelectedPeriod={setWvSelectedPeriod}
+                />
               </div>
             )}
           </div>

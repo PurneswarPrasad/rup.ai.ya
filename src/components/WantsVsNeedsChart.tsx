@@ -19,51 +19,25 @@ import CategoryBreakdownModal from "../components/CategoryBreakdownModal";
 
 interface WantsVsNeedsChartProps {
   expenses: Expense[];
+  timeframe: TimeframeType;
+  setTimeframe: (t: TimeframeType) => void;
+  selectedPeriod: string;
+  setSelectedPeriod: (p: string) => void;
 }
 
 type TimeframeType = "monthly" | "quarterly" | "yearly";
 
-const WantsVsNeedsChart: React.FC<WantsVsNeedsChartProps> = ({ expenses }) => {
-  const [timeframe, setTimeframe] = useState<TimeframeType>("monthly");
-  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
+const WantsVsNeedsChart: React.FC<WantsVsNeedsChartProps> = ({
+  expenses,
+  timeframe,
+  setTimeframe,
+  selectedPeriod,
+  setSelectedPeriod,
+}) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedSegment, setSelectedSegment] = useState<
     "needs" | "wants" | null
   >(null);
-
-  // Get available periods based on timeframe
-  const availablePeriods = useMemo(() => {
-    const periods = new Set<string>();
-
-    expenses.forEach((expense) => {
-      const date = new Date(expense.date);
-      const year = date.getFullYear();
-      const month = date.getMonth();
-
-      switch (timeframe) {
-        case "monthly":
-          periods.add(`${year}-${String(month + 1).padStart(2, "0")}`);
-          break;
-        case "quarterly": {
-          const quarter = Math.floor(month / 3) + 1;
-          periods.add(`${year}-Q${quarter}`);
-          break;
-        }
-        case "yearly":
-          periods.add(year.toString());
-          break;
-      }
-    });
-
-    return Array.from(periods).sort().reverse();
-  }, [expenses, timeframe]);
-
-  // Set default period when timeframe changes
-  React.useEffect(() => {
-    if (availablePeriods.length > 0 && !selectedPeriod) {
-      setSelectedPeriod(availablePeriods[0]);
-    }
-  }, [availablePeriods, selectedPeriod]);
 
   // Filter expenses based on selected timeframe and period
   const filteredExpenses = useMemo(() => {
@@ -142,6 +116,29 @@ const WantsVsNeedsChart: React.FC<WantsVsNeedsChartProps> = ({ expenses }) => {
     return period;
   };
 
+  const availablePeriods = useMemo(() => {
+    const periods = new Set<string>();
+    expenses.forEach((expense) => {
+      const date = new Date(expense.date);
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      switch (timeframe) {
+        case "monthly":
+          periods.add(`${year}-${String(month + 1).padStart(2, "0")}`);
+          break;
+        case "quarterly": {
+          const quarter = Math.floor(month / 3) + 1;
+          periods.add(`${year}-Q${quarter}`);
+          break;
+        }
+        case "yearly":
+          periods.add(year.toString());
+          break;
+      }
+    });
+    return Array.from(periods).sort().reverse();
+  }, [expenses, timeframe]);
+
   if (total === 0) {
     return null;
   }
@@ -158,13 +155,7 @@ const WantsVsNeedsChart: React.FC<WantsVsNeedsChartProps> = ({ expenses }) => {
         <CardContent className="flex-1 flex flex-col p-4">
           {/* Timeframe Selection */}
           <div className="flex gap-2 mb-4">
-            <Select
-              value={timeframe}
-              onValueChange={(value: TimeframeType) => {
-                setTimeframe(value);
-                setSelectedPeriod("");
-              }}
-            >
+            <Select value={timeframe} onValueChange={setTimeframe}>
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
