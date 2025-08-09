@@ -38,7 +38,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
             <AvatarFallback>JD</AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-xl font-semibold text-foreground">{user.name}John Doe</p>
+            <p className="text-xl font-semibold text-foreground">{user.name}</p>
           </div>
         </div>
         <div className="space-y-3 text-sm">
