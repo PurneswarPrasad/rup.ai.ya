@@ -1,7 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import HeroSection from '../components/section/HeroSection'
-// import DashboardPreview from '../components/section/DashboardPreview'
 import ScrollDashboardPreview from '../components/section/ScrollDashboardPreview'
 import TestimonialSection from '../components/section/TestimonialSection'
 import CTASection from '../components/section/CTASection'
