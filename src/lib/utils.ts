@@ -9,7 +9,9 @@ export function cn(...inputs: ClassValue[]) {
 export const startGoogleLogin = async () => {
   // your PKCE code
   const clientId = "59244370203-nrd4pnk7q5k2ob3tscsaj43q1jh4s6ag.apps.googleusercontent.com";
-  const redirectUri = "http://localhost:8080/auth/callback"; // your app's redirect URL
+  const redirectUri = import.meta.env.PROD 
+  ? "https://rup-ai-ya.vercel.app/auth/callback" 
+  : import.meta.env.VITE_GOOGLE_REDIRECT_URI; // your app's redirect URL
   const scope = "openid email profile"; // request identity & email access
   const state = crypto.randomUUID(); // prevent CSRF attacks
 
