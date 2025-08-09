@@ -16,26 +16,20 @@ const GoogleAuthCallback = () => {
       const returnedState = urlParams.get("state");
       const storedState = sessionStorage.getItem("oauth_state");
       const error = urlParams.get("error");
-
-      console.log(storedState);
       
       if (error || returnedState !== storedState) {
-        console.log(2);
         setError("Authentication was cancelled or failed");
         setTimeout(() => navigate("/"), 3000);
         return;
       }
 
       if (!code) {
-        console.log(3);
         setError("No authorization code received");
         setTimeout(() => navigate("/"), 3000);
         return;
       }
 
       const code_verifier = sessionStorage.getItem("code_verifier");
-      
-      console.log("code_verifier:", code_verifier);
 
       const body = new URLSearchParams({
         code,
@@ -59,8 +53,6 @@ const GoogleAuthCallback = () => {
         });
 
         const tokenData = await tokenRes.json();
-
-        console.log("tokenData:", tokenData);
 
         if (tokenData.error) throw new Error(tokenData.error_description);
 
