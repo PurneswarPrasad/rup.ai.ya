@@ -287,7 +287,8 @@ const Index = () => {
       const avgExpenses = totalExpensesNum / numMonths;
       const avgInvestments = totalInvestmentsNum / numMonths;
       const totalInvestmentsTillDate = totalInvestmentsNum;
-      const avgSavings = avgSalary - avgExpenses - avgInvestments;
+      // Fix: Ensure all values are numbers and handle missing data gracefully
+      const avgSavings = (avgSalary || 0) - (avgExpenses || 0) - (avgInvestments || 0);
 
       return { avgSalary, avgExpenses, totalInvestmentsTillDate, avgSavings };
     }, [income, expenses, investments]);
@@ -328,7 +329,8 @@ const Index = () => {
     () => currentMonthInvestments.reduce((sum, e) => sum + e.amount, 0),
     [currentMonthInvestments]
   );
-  const totalSavings = totalIncome - totalExpenses - totalInvestments;
+  // Fix: Ensure all values are numbers and handle missing data gracefully
+  const totalSavings = (totalIncome || 0) - (totalExpenses || 0) - (totalInvestments || 0);
 
   const totalNeeds = useMemo(
     () =>

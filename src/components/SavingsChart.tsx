@@ -103,7 +103,8 @@ const SavingsChart: React.FC<SavingsChartProps> = ({
         expenses: 0,
         investments: 0,
       };
-      const savings = data.income - data.expenses - data.investments;
+      // Fix: Ensure all values are numbers and handle missing data gracefully
+      const savings = (data.income || 0) - (data.expenses || 0) - (data.investments || 0);
       const date = new Date(selectedYear, i, 1);
 
       return {
@@ -134,7 +135,7 @@ const SavingsChart: React.FC<SavingsChartProps> = ({
         value:
           mode === "savings"
             ? d.savings
-            : incomeForMonth - investmentsForMonth - (d.savings),
+            : (incomeForMonth || 0) - (investmentsForMonth || 0) - (d.savings || 0),
       };
     });
   }, [savingsData, mode, income, investments, selectedYear]);
