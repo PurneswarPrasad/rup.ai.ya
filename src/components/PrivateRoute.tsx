@@ -1,7 +1,8 @@
 import { Navigate } from "react-router-dom";
+import { getSessionUser } from "@/lib/auth";
 
 const isAuthenticated = () => {
-    return sessionStorage.getItem("google_token");
+    return Boolean(getSessionUser());
 };
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {

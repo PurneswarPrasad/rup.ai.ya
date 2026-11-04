@@ -6,7 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Index from "./pages/Index";
 import LandingPage from "./pages/LandingPage";
-import GoogleAuthCallback from "./pages/GoogleAuthCallback";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
 import NotFound from "./pages/NotFound";
 import { AppTour } from "@/components/AppTour";
 import PrivateRoute from "@/components/PrivateRoute";
@@ -41,9 +42,8 @@ const App = () => {
               />
               {/* Landing Page Route */}
               <Route path="/" element={<LandingPage />} />
-
-              {/* Google OAuth Callback */}
-              <Route path="/auth/callback" element={<GoogleAuthCallback />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
 
               {/* Redirect any unknown routes to landing */}
               <Route path="*" element={<LandingPage />} />

@@ -1,10 +1,11 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import InfoIconWithTooltip from "@/components/ui/InfoIconWithTooltip";
 import { ArrowUp, ArrowDown, PiggyBank, TrendingUp } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { getSessionUser } from "@/lib/auth";
 
 interface UserProfileCardProps {
   avgSalary: number;
@@ -20,7 +21,15 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
   avgSavings,
 }) => {
 
-  const user = JSON.parse(sessionStorage.getItem("user")) || "John Doe";
+  const user = getSessionUser();
+  const initials = user
+    ? user.name
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase() ?? "")
+        .join("")
+    : "?";
 
   return (
     <Card className="glass-card h-full">
@@ -34,11 +43,15 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
       <CardContent className="space-y-6">
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16 border-2 border-white/50">
-            <AvatarImage src={user.picture} alt="User Avatar" />
-            <AvatarFallback>JD</AvatarFallback>
+            <AvatarFallback>{initials || "?"}</AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-xl font-semibold text-foreground">{user.name}</p>
+            <p className="text-xl font-semibold text-foreground">
+              {user?.name ?? "Account"}
+            </p>
+            {user?.email && (
+              <p className="text-sm text-muted-foreground">{user.email}</p>
+            )}
           </div>
         </div>
         <div className="space-y-3 text-sm">

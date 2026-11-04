@@ -1,7 +1,7 @@
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import Logo from '@/components/ui/Logo'
-import {startGoogleLogin} from '@/lib/utils'
 
 const HeroSection = () => {
 
@@ -12,14 +12,20 @@ const HeroSection = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="absolute top-6 right-6"
+        className="absolute top-6 right-6 flex gap-3"
       >
-        <Button 
-          onClick={startGoogleLogin}
+        <Button
+          asChild
           variant="outline"
           className="bg-transparent border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white transition-all duration-300"
         >
-          Sign Up / Login
+          <Link to="/login">Sign in</Link>
+        </Button>
+        <Button
+          asChild
+          className="bg-blue-600 text-white hover:bg-blue-700"
+        >
+          <Link to="/signup">Create account</Link>
         </Button>
       </motion.div>
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { getSessionUser, ledgerKey } from "@/lib/auth";
 import {
   Calendar as CalendarIcon,
   Plus,
@@ -96,14 +97,18 @@ export const INITIAL_INVESTMENT_TYPES = [
 ];
 
 const Index = () => {
+  const userId = getSessionUser()?.id ?? null;
+  const readLedger = (base: "expenses_v2" | "income_v2" | "investments_v2") =>
+    userId
+      ? JSON.parse(localStorage.getItem(ledgerKey(base, userId)) || "[]")
+      : [];
+
   const [expenses, setExpenses] = useState<Expense[]>(() =>
-    JSON.parse(localStorage.getItem("expenses_v2") || "[]")
+    readLedger("expenses_v2")
   );
-  const [income, setIncome] = useState<Income[]>(() =>
-    JSON.parse(localStorage.getItem("income_v2") || "[]")
-  );
+  const [income, setIncome] = useState<Income[]>(() => readLedger("income_v2"));
   const [investments, setInvestments] = useState<Investment[]>(() =>
-    JSON.parse(localStorage.getItem("investments_v2") || "[]")
+    readLedger("investments_v2")
   );
 
   const [showTransactionSheet, setShowTransactionSheet] = useState(false);
@@ -134,14 +139,23 @@ const Index = () => {
 
   // Load and save data
   useEffect(() => {
-    localStorage.setItem("expenses_v2", JSON.stringify(expenses));
-  }, [expenses]);
+    if (!userId) return;
+    localStorage.setItem(
+      ledgerKey("expenses_v2", userId),
+      JSON.stringify(expenses)
+    );
+  }, [expenses, userId]);
   useEffect(() => {
-    localStorage.setItem("income_v2", JSON.stringify(income));
-  }, [income]);
+    if (!userId) return;
+    localStorage.setItem(ledgerKey("income_v2", userId), JSON.stringify(income));
+  }, [income, userId]);
   useEffect(() => {
-    localStorage.setItem("investments_v2", JSON.stringify(investments));
-  }, [investments]);
+    if (!userId) return;
+    localStorage.setItem(
+      ledgerKey("investments_v2", userId),
+      JSON.stringify(investments)
+    );
+  }, [investments, userId]);
   // Add at the top, after other useState hooks
   const [wvTimeframe, setWvTimeframe] = useState<
     "monthly" | "quarterly" | "yearly"
@@ -183,14 +197,23 @@ const Index = () => {
 
   // Load and save data
   useEffect(() => {
-    localStorage.setItem("expenses_v2", JSON.stringify(expenses));
-  }, [expenses]);
+    if (!userId) return;
+    localStorage.setItem(
+      ledgerKey("expenses_v2", userId),
+      JSON.stringify(expenses)
+    );
+  }, [expenses, userId]);
   useEffect(() => {
-    localStorage.setItem("income_v2", JSON.stringify(income));
-  }, [income]);
+    if (!userId) return;
+    localStorage.setItem(ledgerKey("income_v2", userId), JSON.stringify(income));
+  }, [income, userId]);
   useEffect(() => {
-    localStorage.setItem("investments_v2", JSON.stringify(investments));
-  }, [investments]);
+    if (!userId) return;
+    localStorage.setItem(
+      ledgerKey("investments_v2", userId),
+      JSON.stringify(investments)
+    );
+  }, [investments, userId]);
 
   const addTransaction = (
     type: "income" | "expense" | "investment",

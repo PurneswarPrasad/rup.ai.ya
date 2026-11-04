@@ -1,6 +1,6 @@
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import {startGoogleLogin} from '@/lib/utils'
 
 const CTASection = () => {
   
@@ -13,12 +13,12 @@ const CTASection = () => {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <Button 
-            onClick={startGoogleLogin}
+          <Button
+            asChild
             size="lg"
             className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-12 py-4 text-lg font-semibold rounded-xl shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 transform hover:scale-105"
           >
-            Start Tracking Now
+            <Link to="/signup">Start Tracking Now</Link>
           </Button>
         </motion.div>
       </div>
